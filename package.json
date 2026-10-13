@@ -1,0 +1,21 @@
+{
+  "name": "verse-of-the-day",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "catalogue:check": "node scripts/translations.mjs --check",
+    "catalogue:generate": "node scripts/translations.mjs --generate",
+    "catalogue:refresh": "node scripts/translations.mjs --refresh",
+    "dev": "node scripts/serve.mjs",
+    "test": "node --test",
+    "test:browser": "playwright test",
+    "test:live": "node scripts/live-smoke.mjs"
+  },
+  "devDependencies": {
+    "@playwright/test": "1.64.0"
+  }
+}

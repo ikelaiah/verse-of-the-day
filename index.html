@@ -19,9 +19,104 @@
   </style>
 </head>
 <body>
-  <div id="ourmanna-verse">Loading...</div>
-  <script src="https://beta.ourmanna.com/verses/api/js/"
-          onerror="document.getElementById('ourmanna-verse').textContent='Verse of the day is unavailable right now.'"></script>
-  <p class="attribution">Powered by <a href="https://www.ourmanna.com/" target="_blank" rel="noopener">OurManna.com</a></p>
+  <!--
+    URL parameters (all optional):
+      order=random       new OurManna verse on every load (default: daily)
+      translation=kjv    show OurManna's verse in another translation via bible-api.com
+                         (kjv, web, webbe, asv, bbe, darby, dra, oeb-cw, oeb-us, ylt; default: OurManna's NIV)
+      ref=John 3:16      show a fixed passage instead of OurManna's pick (default translation: web)
+  -->
+  <div id="ourmanna-verse">
+    <div id="mannaverse-container">
+      <p id="mannaverse">Loading...</p>
+      <p id="mannaverse-reference"></p>
+    </div>
+  </div>
+  <p class="attribution" id="attribution"></p>
+
+  <script>
+    (function () {
+      var params = new URLSearchParams(location.search);
+      var order = params.get('order') === 'random' ? 'random' : 'daily';
+      var translation = (params.get('translation') || '').trim().toLowerCase();
+      var ref = (params.get('ref') || '').trim();
+      if (translation === 'niv') translation = '';
+
+      var verseEl = document.getElementById('mannaverse');
+      var refEl = document.getElementById('mannaverse-reference');
+      var attrEl = document.getElementById('attribution');
+
+      function link(href, text) {
+        var a = document.createElement('a');
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'noopener';
+        a.textContent = text;
+        return a;
+      }
+
+      function show(text, reference, version) {
+        verseEl.textContent = text.replace(/\s+/g, ' ').trim();
+        var small = document.createElement('small');
+        var i = document.createElement('i');
+        small.id = 'mannaverse-version';
+        i.textContent = '(' + version + ')';
+        small.appendChild(i);
+        refEl.textContent = reference;
+        refEl.appendChild(small);
+      }
+
+      function credit(fromManna, translationName) {
+        attrEl.textContent = '';
+        if (fromManna) {
+          attrEl.append(translationName ? 'Verse chosen by ' : 'Powered by ', link('https://www.ourmanna.com/', 'OurManna.com'));
+        }
+        if (translationName) {
+          if (fromManna) attrEl.append(' · ');
+          attrEl.append(translationName + ' via ', link('https://bible-api.com/', 'bible-api.com'));
+        }
+      }
+
+      function fail() {
+        verseEl.textContent = 'Verse of the day is unavailable right now.';
+        refEl.textContent = '';
+        attrEl.textContent = '';
+      }
+
+      function getJson(url) {
+        return fetch(url).then(function (res) {
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          return res.json();
+        });
+      }
+
+      function fromBibleApi(reference, fromManna) {
+        var url = 'https://bible-api.com/' + encodeURIComponent(reference) +
+                  '?translation=' + encodeURIComponent(translation || 'web');
+        return getJson(url).then(function (d) {
+          show(d.text, d.reference, d.translation_id.toUpperCase());
+          credit(fromManna, d.translation_name);
+        });
+      }
+
+      if (ref) {
+        fromBibleApi(ref, false).catch(fail);
+        return;
+      }
+
+      getJson('https://beta.ourmanna.com/api/v1/get?format=json&order=' + order)
+        .then(function (d) {
+          var v = d.verse.details;
+          function showManna() {
+            show(v.text, v.reference, v.version);
+            credit(true);
+          }
+          if (!translation) return showManna();
+          // Unknown translation, passage missing from it, or rate-limited: keep OurManna's own text
+          return fromBibleApi(v.reference, true).catch(showManna);
+        })
+        .catch(fail);
+    })();
+  </script>
 </body>
 </html>

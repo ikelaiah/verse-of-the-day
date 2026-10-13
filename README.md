@@ -17,7 +17,7 @@ SharePoint's Embed web part doesn't accept script tags, and OurManna can't be if
 
 ## Usage
 
-Point an iframe at the live page. With no parameters it shows OurManna's verse of the day in the NIV:
+Point an iframe at the live page. With no parameters it shows OurManna's verse of the day in the **King James Version**:
 
 ```html
 <iframe src="https://ikelaiah.github.io/verse-of-the-day/"
@@ -33,20 +33,21 @@ All parameters are optional and can be combined.
 | Parameter | What it does | Default |
 |---|---|---|
 | `order=random` | Shows a different OurManna verse on every page load | `daily` |
-| `translation=<id>` | Shows the verse in another translation (see [Translations](#translations)) | NIV, from OurManna |
+| `translation=<id>` | Shows the verse in another translation (see [Translations](#translations)) | `kjv` |
 | `ref=<passage>` | Shows a fixed passage of your choice instead of OurManna's pick | none |
 
 ### Examples
 
 | URL | Result |
 |---|---|
-| `…/verse-of-the-day/` | Today's verse, NIV |
+| `…/verse-of-the-day/` | Today's verse, King James Version |
+| `…/verse-of-the-day/?translation=niv` | Today's verse, NIV (OurManna's own text) |
 | `…/verse-of-the-day/?translation=bsb` | Today's verse, Berean Standard Bible |
 | `…/verse-of-the-day/?translation=webbe` | Today's verse, World English Bible (British spelling) |
-| `…/verse-of-the-day/?order=random` | A random verse on each load, NIV |
-| `…/verse-of-the-day/?order=random&translation=kjv` | A random verse on each load, King James Version |
-| `…/verse-of-the-day/?ref=John 3:16` | John 3:16, Berean Standard Bible |
-| `…/verse-of-the-day/?ref=Psalm 23&translation=kjv` | All of Psalm 23, King James Version |
+| `…/verse-of-the-day/?order=random` | A random verse on each load, King James Version |
+| `…/verse-of-the-day/?order=random&translation=niv` | A random verse on each load, NIV |
+| `…/verse-of-the-day/?ref=John 3:16` | John 3:16, King James Version |
+| `…/verse-of-the-day/?ref=Psalm 23&translation=bsb` | All of Psalm 23, Berean Standard Bible |
 | `…/verse-of-the-day/?ref=Romans 8:38-9:1&translation=nasb` | A passage across a chapter break, NASB |
 
 Spaces in `ref` are fine in most places. If a tool complains, write them as `%20` (`?ref=John%203:16`).
@@ -59,8 +60,8 @@ Translations other than OurManna's NIV come from the [Free Use Bible API](https:
 
 | ID | Translation | Licence |
 |---|---|---|
-| `bsb` | Berean Standard Bible (default for `ref`) | Public domain |
-| `kjv` | King James Version | Public domain |
+| `kjv` | King James Version (default) | Public domain |
+| `bsb` | Berean Standard Bible | Public domain |
 | `web` | World English Bible | Public domain |
 | `webbe` | World English Bible, British Edition | Public domain |
 | `asv` | American Standard Version (1901) | Public domain |
@@ -74,7 +75,7 @@ Translations other than OurManna's NIV come from the [Free Use Bible API](https:
 
 † For these, the page automatically shows the publisher's copyright notice under the verse, as their licences require.
 
-`translation=niv`, or leaving the parameter out, uses OurManna's own NIV text.
+`translation=niv` shows OurManna's own NIV text. It only works without `ref`, because the Free Use Bible API doesn't have the NIV. With `ref`, it falls back to KJV.
 
 **Other translations.** You can also pass any translation ID from the API's [full list](https://bible.helloao.org/api/available_translations.json) (over 1,000 translations, many languages), for example `translation=eng_fbv` for the Free Bible Version. These IDs are case-sensitive. Check each translation's licence before using it.
 
@@ -91,11 +92,11 @@ Translations other than OurManna's NIV come from the [Free Use Bible API](https:
                    │                                            │
    OurManna JSON API (verse + reference)                        │
                    │                                            │
-     translation set? ── no ──► show OurManna's NIV text        │
+     translation=niv? ── yes ──► show OurManna's NIV text       │
                    │                                            │
-                  yes                                           │
+                   no                                           │
                    ▼                                            ▼
-     Free Use Bible API: fetch the chapter(s) in the chosen translation,
+     Free Use Bible API: fetch the chapter(s) in the chosen translation (default KJV),
      then pick out the verses in the reference
                    │
        success ──► show that translation (+ copyright notice if required)
@@ -118,8 +119,8 @@ To add your own short translation ID, add an entry to the `TRANSLATIONS` object 
 
 ## Known limitations
 
-- **NIV only comes from OurManna.** ESV, NLT, CSB and NIV aren't in the Free Use Bible API, so `translation=` can't offer them. OurManna's daily pick is the only source of NIV text here.
-- **Verse ranges can end mid-sentence.** OurManna chooses its ranges to read well in the NIV. Other translations divide sentences differently, so the same range may start or end mid-sentence.
+- **NIV only comes from OurManna.** ESV, NLT, CSB and NIV aren't in the Free Use Bible API. ESV, NLT and CSB aren't available at all, and NIV works only for OurManna's own pick (`translation=niv`), not with `ref`.
+- **Verse ranges can end mid-sentence.** OurManna chooses its ranges to read well in the NIV. KJV (the default) and other translations divide sentences differently, so the same range may start or end mid-sentence.
 - **Some references fall back to NIV.** References the page can't read fall back to OurManna's NIV text: comma lists such as `Psalm 46:1,10`, abbreviations such as `Jn 3:16`, and spans of more than 3 chapters. With `ref=`, they show an error message instead.
 - **OurManna's choices are fixed.** Its API only accepts `format` and `order`, and it labels every verse "NIV", although some of its random verses have King James wording.
 - **NASB 1995 isn't built in.** The API has it as `NASB95`, but supplies the NASB 2020 copyright notice for it.

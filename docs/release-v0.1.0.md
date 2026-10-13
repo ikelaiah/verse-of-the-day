@@ -21,22 +21,23 @@ This release adds a separate embed builder and hardens the existing static widge
 | Live API/browser smoke | Passed on 2026-10-13: OurManna returned NIV for Romans 2:7-8; live `eng_net` John 3:16 rendered in Chromium with its supplied attribution notice; both live widget paths had no page errors |
 | Layout review | Chromium screenshot reviewed at 1280×900; browser tests cover a 320px host, a 320px preview, long scrollable content, and a 160 CSS-pixel reflow viewport equivalent to 200% zoom on a 320px viewport |
 | Keyboard | Native controls and visible focus exercised in Chromium |
+| Published site | Passed 2026-10-13: widget, setup page, scripts, styles, and translation catalogue returned successfully; fixed NET John 3:16 preview and generated iframe URL worked in Chromium with no browser exceptions |
 | Screen reader | Not tested; no screen-reader app was available in this environment |
 | SharePoint | Not tenant-tested; its site collection embed policy and a tenant administrator were unavailable |
 | Actual browser zoom control | Headless Chromium did not respond to its browser zoom shortcut. Layout reflow and wrapping were checked at the equivalent 160 CSS-pixel viewport; the browser UI's zoom control itself was not exercised. |
 
 ## Publication record
 
-Fill in these fields after the deployment and public release are verified:
+Publication details and post-release verification:
 
 - Repository: <https://github.com/ikelaiah/verse-of-the-day>
 - Candidate branch: `codex/v0.1.0`
-- Candidate/deployed commit: pending
-- CI workflow run: pending
-- GitHub Pages deployment: pending
-- Public release URL: pending
-- Tag: `v0.1.0` pending
-- Rollback target: `main` commit immediately before the release merge, to be recorded after merge
+- Candidate/deployed commit: `d46347988248c5f7e2701bb6913641324ed47046` (also `main` at publication)
+- CI workflow run: [38363161311](https://github.com/ikelaiah/verse-of-the-day/actions/runs/38363161311) — passed
+- GitHub Pages deployment: [38363161365](https://github.com/ikelaiah/verse-of-the-day/actions/runs/38363161365) — passed
+- Public release URL: <https://github.com/ikelaiah/verse-of-the-day/releases/tag/v0.1.0>
+- Tag: annotated `v0.1.0` points to `d46347988248c5f7e2701bb6913641324ed47046`
+- Rollback target: `bc313c3e78beafca6780dc5621afae2194d0666a`, the `main` commit immediately before the release merge; revert the release merge to redeploy that baseline if needed
 
 ## Compatibility and licence notes
 

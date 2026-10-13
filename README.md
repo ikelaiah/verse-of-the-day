@@ -79,7 +79,7 @@ Translations other than OurManna's NIV come from the [Free Use Bible API](https:
 
 #### Other translations
 
-You can pass any translation ID from the API's [full list](https://bible.helloao.org/api/available_translations.json). These IDs are case-sensitive. Some other public-domain English translations:
+You can pass any translation ID from the API. **[LANGUAGES.md](LANGUAGES.md) lists all of them by language**, with each one's licence. These IDs are case-sensitive. Some other public-domain English translations:
 
 | ID | Translation |
 |---|---|

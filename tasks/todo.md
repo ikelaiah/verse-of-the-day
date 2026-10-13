@@ -20,10 +20,10 @@ Executor: Luna 6. The execution request authorizes the planned public release. T
 - [x] T11 — Rewrite README and add development/release documentation.
 - [x] Checkpoint D — Builder, generated examples, documentation, and review findings agree.
 - [x] T12 — Add deterministic Chromium browser coverage, including the repository subpath.
-- [ ] T13 — Automate checks in CI and verify the actual pull-request workflow run.
+- [x] T13 — Automate checks in CI and verify the actual pull-request and main-branch workflow runs.
 - [x] T14 — Review the candidate in Chromium and run live API/browser integration checks. Zoom reflow was tested at the equivalent 160 CSS-pixel viewport; the browser's zoom control itself, a screen reader, and a SharePoint tenant were unavailable and are recorded as limitations.
 - [x] T15 — Prepare version 0.1.0, changelog, release notes, and candidate evidence.
-- [ ] T16 — Publish, tag, and verify the public release.
+- [x] T16 — Publish, tag, and verify the public release.
 
 ## Release gates
 
@@ -31,7 +31,7 @@ Executor: Luna 6. The execution request authorizes the planned public release. T
 - [x] Clean dependency install succeeds under Node 24.11.0; package metadata is 0.1.0.
 - [x] Node regression tests pass, including invalid endpoints, request deadlines, text safety, and contrast.
 - [x] Offline catalogue check passes; live refresh date and 1,256/1,004 counts are recorded.
-- [ ] Deterministic browser suite passes and actual CI run is verified. Local suite passes; PR run is pending.
+- [x] Deterministic browser suite passes and actual CI run is verified. Local suite: 12 passed; PR and main-branch CI passed.
 - [x] Chromium desktop/narrow/theme/RTL/long-passage/keyboard checks pass. Reflow at 160 CSS pixels covers the effective layout width of 200% zoom on a 320px viewport; direct zoom UI input was unavailable.
 - [x] Screen-reader limitation is explicitly recorded; no screen-reader app was available.
 - [x] Live API smoke passed for OurManna and Free Use Bible API, including live attribution in Chromium.
@@ -40,11 +40,11 @@ Executor: Luna 6. The execution request authorizes the planned public release. T
 - [x] No unresolved high/medium implementation findings remain. Direct zoom UI, screen-reader, and tenant checks remain stated test limitations.
 - [x] README, catalogue, development notes, changelog, and release notes match the candidate.
 - [x] No software licence was added; the repository's absent software licence is described accurately.
-- [ ] Candidate/deployed commit, CI run, Pages deployment, and rollback target are recorded after publication.
+- [x] Candidate/deployed commit, CI run, Pages deployment, and rollback target are recorded in `docs/release-v0.1.0.md`.
 - [x] Public release authorization is explicit; repository visibility and hosting security settings remain unchanged.
-- [ ] Public deployment and post-deployment smoke checks pass.
-- [ ] Annotated `v0.1.0` tag and public release target the deployed commit.
-- [ ] Final handoff includes the actual release URL, commit/tag, verification, and limitations.
+- [x] Public deployment and post-deployment smoke checks pass.
+- [x] Annotated `v0.1.0` tag and public release target the deployed commit.
+- [x] Final handoff includes the actual release URL, commit/tag, verification, and limitations.
 
 ## Execution log
 
@@ -58,6 +58,8 @@ Executor: Luna 6. The execution request authorizes the planned public release. T
 
 2026-10-13 — Visually reviewed Chromium screenshot at 1280×900. Browser coverage checks 320px width, a 320px preview, keyboard focus, RTL, dark auto-theme, long passage scroll, and equivalent zoom reflow at 160 CSS pixels. Actual browser zoom controls, screen reader, and SharePoint tenant were unavailable; see `docs/release-v0.1.0.md`.
 
+2026-10-13 — Opened PR #1 and verified its CI run (`38362959518`). Merged as `d46347988248c5f7e2701bb6913641324ed47046`; main CI (`38363161311`) and GitHub Pages deployment (`38363161365`) passed. Public Chromium smoke verified the widget, builder, catalogue, fixed NET John 3:16 preview, and generated iframe URL. Created annotated tag `v0.1.0` and published <https://github.com/ikelaiah/verse-of-the-day/releases/tag/v0.1.0>. Rollback baseline is `bc313c3e78beafca6780dc5621afae2194d0666a`.
+
 ## Next action
 
-Commit the tested candidate, push `codex/v0.1.0`, open a PR to `main`, and verify CI. If the remote workflow and Pages deploy pass, publish the annotated tag/release and update the release record with exact remote evidence.
+Release `v0.1.0` is published. The tag and release point at deployed commit `d46347988248c5f7e2701bb6913641324ed47046`; publication evidence and the rollback target are recorded in `docs/release-v0.1.0.md`.

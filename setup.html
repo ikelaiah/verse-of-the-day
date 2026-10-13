@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Configure, preview, and copy a Verse of the Day embed.">
+  <title>Build an embed · Verse of the Day</title>
+  <link rel="stylesheet" href="./assets/setup.css">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="./index.html">Verse of the Day</a>
+    <span>Embed builder</span>
+  </header>
+  <main>
+    <div class="intro">
+      <h1>Build your verse widget</h1>
+      <p>Choose a passage and appearance, preview it, then copy the link or iframe for your page.</p>
+    </div>
+
+    <div class="builder-grid">
+      <form id="builder-form" novalidate>
+        <section class="panel" aria-labelledby="content-heading">
+          <h2 id="content-heading">Verse</h2>
+          <fieldset>
+            <legend>Choose what to show</legend>
+            <label class="radio-row"><input type="radio" name="mode" value="daily" checked> Daily verse</label>
+            <label class="radio-row"><input type="radio" name="mode" value="random"> Random verse on each load</label>
+            <label class="radio-row"><input type="radio" name="mode" value="fixed"> A passage I choose</label>
+          </fieldset>
+          <div id="reference-field" hidden>
+            <label for="reference">Bible reference</label>
+            <input id="reference" name="reference" type="text" placeholder="John 3:16" autocomplete="off" aria-describedby="reference-help">
+            <p class="hint" id="reference-help">Use a full book name, such as John 3:16 or Psalm 23. Passages can span up to three chapters.</p>
+          </div>
+          <div class="translation-picker">
+            <label for="translation-search">Find a translation</label>
+            <input id="translation-search" type="search" placeholder="Search name, language, or ID" autocomplete="off" aria-describedby="catalogue-help result-count">
+            <p class="hint" id="catalogue-help">Translation availability and usage rights vary. Check the source information before publishing.</p>
+            <p class="result-count" id="result-count" aria-live="polite">Loading translations…</p>
+            <label class="visually-hidden" for="translation-list">Choose translation</label>
+            <select id="translation-list" size="8" aria-describedby="result-count selected-credit" disabled></select>
+            <div id="selected-credit" class="credit-card" aria-live="polite"></div>
+          </div>
+          <p id="mode-note" class="notice" role="status" hidden></p>
+        </section>
+
+        <section class="panel" aria-labelledby="appearance-heading">
+          <h2 id="appearance-heading">Appearance</h2>
+          <div class="form-row">
+            <label for="theme">Colour theme</label>
+            <select id="theme" name="theme">
+              <option value="light">Light (transparent background)</option>
+              <option value="dark">Dark</option>
+              <option value="auto">Follow reader’s device</option>
+            </select>
+          </div>
+          <div class="form-row height-row">
+            <label for="height">Embed height</label>
+            <div><input id="height" name="height" type="number" min="160" max="2000" step="10" value="220"><span>pixels (160–2000)</span></div>
+          </div>
+          <label class="checkbox-row"><input id="verse-numbers" type="checkbox"> Show verse numbers</label>
+        </section>
+
+        <section class="panel copy-panel" aria-labelledby="copy-heading">
+          <h2 id="copy-heading">Use your widget</h2>
+          <p id="form-status" class="form-status" role="status" aria-live="polite"></p>
+          <label for="widget-link">Widget link</label>
+          <div class="copy-row"><textarea id="widget-link" rows="2" readonly spellcheck="false" aria-describedby="link-copy-status"></textarea><button type="button" data-copy="link">Copy link</button></div>
+          <p id="link-copy-status" class="copy-status" role="status" aria-live="polite"></p>
+          <label for="iframe-code">HTML iframe</label>
+          <div class="copy-row"><textarea id="iframe-code" rows="3" readonly spellcheck="false" aria-describedby="iframe-copy-status"></textarea><button type="button" data-copy="iframe">Copy iframe</button></div>
+          <p id="iframe-copy-status" class="copy-status" role="status" aria-live="polite"></p>
+          <p class="hint">Paste the iframe into a page that allows embedded content. In SharePoint, add an Embed web part and paste the iframe markup.</p>
+        </section>
+      </form>
+
+      <section class="panel preview-panel" aria-labelledby="preview-heading">
+        <div class="preview-title-row"><h2 id="preview-heading">Live preview</h2><span id="preview-size">Desktop width</span></div>
+        <div class="preview-controls" role="group" aria-label="Preview width">
+          <button type="button" data-preview-width="desktop" aria-pressed="true">Desktop</button>
+          <button type="button" data-preview-width="narrow" aria-pressed="false">Narrow (320px)</button>
+        </div>
+        <div class="preview-stage" id="preview-stage">
+          <iframe id="preview-frame" title="Live preview of your Verse of the Day widget" loading="lazy"></iframe>
+          <p id="preview-placeholder">Choose settings to see your preview.</p>
+        </div>
+        <p id="preview-status" class="preview-status" role="status" aria-live="polite">The preview reports its loading and provider messages here.</p>
+        <p class="hint">The frame has a fixed height and scrolls when the passage is longer. The frame boundary is shown here so you can judge the space it needs.</p>
+      </section>
+    </div>
+  </main>
+  <script type="module" src="./assets/setup.js"></script>
+</body>
+</html>

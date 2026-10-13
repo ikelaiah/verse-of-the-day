@@ -1,147 +1,106 @@
 # Verse of the Day
 
-A tiny, single-file web page that shows a daily Bible verse, built to be embedded in an **iframe**, for example in SharePoint Online's **Embed** web part.
+A small, static Bible passage widget that can be embedded on a web page. Configure it with the [embed builder](https://ikelaiah.github.io/verse-of-the-day/setup.html), then copy a link or iframe.
 
-**Live page:** https://ikelaiah.github.io/verse-of-the-day/
+- **Widget:** <https://ikelaiah.github.io/verse-of-the-day/>
+- **Embed builder:** <https://ikelaiah.github.io/verse-of-the-day/setup.html>
+- **Translations:** [LANGUAGES.md](LANGUAGES.md)
 
-## Why this exists
+## Quick start
 
-[OurManna](https://www.ourmanna.com/) offers a free Verse of the Day widget, but only as a `<script>` tag:
+1. Open the [embed builder](https://ikelaiah.github.io/verse-of-the-day/setup.html).
+2. Choose daily, random, or a fixed passage; choose a translation and appearance.
+3. Check the preview at desktop and narrow width.
+4. Copy the iframe and paste it into a page that allows iframe embeds.
+
+The default widget shows OurManna's daily verse in the King James Version (KJV). It needs no account, API key, build step, or server-side code. On each page load, the visitor's browser requests verse data from [OurManna](https://www.ourmanna.com/) and, for other translations, the [Free Use Bible API](https://bible.helloao.org/).
+
+## Embed examples
+
+The builder creates iframe markup for the current GitHub Pages path, including the selected height and options. A basic KJV embed is:
 
 ```html
-<div id="ourmanna-verse">Loading...</div>
-<script src="https://beta.ourmanna.com/verses/api/js/" type="text/javascript"></script>
+<iframe src="https://ikelaiah.github.io/verse-of-the-day/index.html?translation=kjv&amp;theme=light"
+        title="Verse of the Day" width="100%" height="220" style="border:0"></iframe>
 ```
 
-SharePoint's Embed web part doesn't accept script tags, and OurManna can't be iframed directly because its server sends `X-Frame-Options: SAMEORIGIN`. This repo hosts a small page on GitHub Pages that fetches the verse itself, so any site that accepts an iframe can show it. It can also show the verse in other translations through the [Free Use Bible API](https://bible.helloao.org/).
+The iframe scrolls when its content is taller than the selected height. Keep a useful height for long passages and attribution. Do not add `scrolling="no"`.
 
-## Usage
+Examples you can open directly:
 
-Point an iframe at the live page. With no parameters it shows OurManna's verse of the day in the **King James Version**:
+- [Daily KJV](https://ikelaiah.github.io/verse-of-the-day/?translation=kjv)
+- [Random NET Bible](https://ikelaiah.github.io/verse-of-the-day/?order=random&translation=net)
+- [Psalm 23 in the Berean Standard Bible](https://ikelaiah.github.io/verse-of-the-day/?ref=Psalm%2023&translation=bsb)
+- [John 3:16–18 in the World English Bible](https://ikelaiah.github.io/verse-of-the-day/?ref=John%203%3A16-18&translation=web)
+- [Romans 8:38–9:1 with verse numbers](https://ikelaiah.github.io/verse-of-the-day/?ref=Romans%208%3A38-9%3A1&translation=kjv&verseNumbers=1)
 
-```html
-<iframe src="https://ikelaiah.github.io/verse-of-the-day/"
-        title="Verse of the Day"
-        width="100%" height="220"
-        frameborder="0" scrolling="no"></iframe>
+## Settings
+
+Every setting is optional. `ref` takes precedence over `order`; an empty or whitespace-only `translation` selects KJV.
+
+| Setting | Values | Default | Effect |
+|---|---|---|---|
+| `order` | `daily`, `random` | `daily` | `random` requests a different source verse on each page load. |
+| `translation` | Alias or exact API ID | `kjv` | Selects the requested translation. See [the full catalogue](LANGUAGES.md). |
+| `ref` | Full book name and chapter/verse | none | Shows a fixed passage instead of the source verse. |
+| `theme` | `light`, `dark`, `auto` | `light` | `light` is transparent; `dark` uses a dark background; `auto` follows the reader's device colour preference. |
+| `verseNumbers` | `1` | off | Shows verse numbers and chapter context for cross-chapter passages. |
+
+Aliases are friendly shortcuts and are case-insensitive. Full API IDs preserve their exact case. Examples include `kjv`, `bsb`, `net`, `web`, `webbe`, `asv`, `bbe`, `darby`, `dra`, and `ylt`. You can use any current ID in [LANGUAGES.md](LANGUAGES.md). The catalogue changes over time; check a translation's source and terms before use.
+
+The older `nasb` and `amp` shortcuts remain recognized for existing URLs, but their corresponding translation IDs are absent from the current upstream catalogue snapshot (2026-10-13). The widget reports the unavailable translation and uses its visible daily/random fallback when possible. These shortcuts are not offered by the builder.
+
+`niv` means OurManna's own source text, not an API translation. It works for daily and random verses. For compatibility, an explicit fixed-reference URL with `translation=niv` displays KJV and explains the substitution; the builder asks you to choose another translation for a fixed passage.
+
+### References
+
+Use full book names. Supported examples are `John 3:16`, `John 3:16-18`, `Psalm 23`, and `Romans 8:38-9:1`. Cross-chapter passages may span up to three chapters. Book-name aliases include `Psalm`/`Psalms` and `Song of Songs`/`Song of Solomon`.
+
+Abbreviations such as `Jn 3:16`, comma-separated verse lists such as `Psalm 46:1,10`, and passages spanning more than three chapters are not supported. Invalid syntax is explained before the widget makes a request. If a valid-looking endpoint does not exist in the selected translation, the widget reports that the passage is unavailable instead of showing a partial range.
+
+## SharePoint
+
+1. Add an **Embed** web part to the page and paste the iframe from the builder into its **Website address or embed code** field.
+2. If SharePoint rejects the domain, ask a site collection administrator to allow `ikelaiah.github.io` under the site's embed security settings. Do not allow every external domain just to enable this widget.
+3. Set an adequate height in the builder. The iframe keeps a fixed height and allows its contents to scroll.
+
+SharePoint's embed policy and available controls depend on the site and tenant. The owner has not verified this widget in a SharePoint tenant. Microsoft's [Embed web part guidance](https://support.microsoft.com/en-us/sharepoint/sites-pages/add-content-to-your-page-using-the-embed-web-part) explains that embed code must use an HTTPS iframe, and [domain controls](https://support.microsoft.com/en-us/sharepoint/sites-pages/allow-or-restrict-the-ability-to-embed-content-on-sharepoint-pages) are managed by site collection administrators.
+
+## Behaviour and limits
+
+- Verse selection happens when the page loads. Daily selection follows OurManna's schedule; there is no background refresh timer. Random mode requests a new source verse on each load.
+- If a daily/random translation cannot supply the selected book or passage, the widget keeps the source verse and displays a fallback message. A fixed passage never silently changes translations.
+- OurManna chooses its verse text and labels its response. Other translations can divide verses or sentences differently, so a selected passage may read differently at its edges.
+- Light mode is transparent and works best over a light host background. Dark mode uses its own dark background. Auto follows the iframe reader's device preference, not the containing SharePoint section's colour.
+- No automatic iframe height adjustment is promised. Set a height in the builder and leave scrolling enabled.
+- Daily/random source verses depend on OurManna; another translation also depends on the Free Use Bible API. Fixed passages use the Free Use Bible API only. A timeout, provider outage, or malformed response is shown with a retry option or a visible fallback.
+- Translation availability, book coverage, attribution data, and usage terms differ. The API catalogue is informational and does not grant rights. Review the publisher's source terms; the widget does not guarantee licence compliance.
+- The project has no software licence file. This release does not assign one.
+
+## Development
+
+Use Node.js 24 LTS and npm. From a clean checkout:
+
+```sh
+npm ci
+npm test
+npm run catalogue:check
+npm run dev -- --host 127.0.0.1 --port 8765
 ```
 
-### URL parameters
+Open <http://127.0.0.1:8765/> for the widget or <http://127.0.0.1:8765/setup.html> for the builder. Install the pinned Playwright browser once, then run the deterministic browser suite:
 
-All parameters are optional and can be combined.
-
-| Parameter | What it does | Default |
-|---|---|---|
-| `order=random` | Shows a different OurManna verse on every page load | `daily` |
-| `translation=<id>` | Shows the verse in another translation (see [Translations](#translations)) | `kjv` |
-| `ref=<passage>` | Shows a fixed passage of your choice instead of OurManna's pick | none |
-
-### Examples
-
-| URL | Result |
-|---|---|
-| `…/verse-of-the-day/` | Today's verse, King James Version |
-| `…/verse-of-the-day/?translation=niv` | Today's verse, NIV (OurManna's own text) |
-| `…/verse-of-the-day/?translation=bsb` | Today's verse, Berean Standard Bible |
-| `…/verse-of-the-day/?translation=webbe` | Today's verse, World English Bible (British spelling) |
-| `…/verse-of-the-day/?order=random` | A random verse on each load, King James Version |
-| `…/verse-of-the-day/?order=random&translation=niv` | A random verse on each load, NIV |
-| `…/verse-of-the-day/?ref=John 3:16` | John 3:16, King James Version |
-| `…/verse-of-the-day/?ref=Psalm 23&translation=bsb` | All of Psalm 23, Berean Standard Bible |
-| `…/verse-of-the-day/?ref=Romans 8:38-9:1&translation=nasb` | A passage across a chapter break, NASB |
-
-Spaces in `ref` are fine in most places. If a tool complains, write them as `%20` (`?ref=John%203:16`).
-
-**Passage formats `ref` understands:** `John 3:16`, `John 3:16-18`, `Psalm 23` (whole chapter), `Romans 8:38-9:1` (up to 3 chapters). Use full book names: `1 John`, `Song of Songs` or `Song of Solomon`, `Psalm` or `Psalms`.
-
-### Translations
-
-Translations other than OurManna's NIV come from the [Free Use Bible API](https://bible.helloao.org/), which has over 1,200 translations (54 in English). The 12 below have short IDs built into this page. Any other can be used by its full ID; see [Other translations](#other-translations).
-
-| ID | Translation | Licence |
-|---|---|---|
-| `kjv` | King James Version (default) | Public domain |
-| `bsb` | Berean Standard Bible | Public domain |
-| `web` | World English Bible | Public domain |
-| `webbe` | World English Bible, British Edition | Public domain |
-| `asv` | American Standard Version (1901) | Public domain |
-| `bbe` | Bible in Basic English | Public domain |
-| `darby` | Darby Translation | Public domain |
-| `dra` | Douay-Rheims 1899 | Public domain |
-| `ylt` | Young's Literal Translation | Public domain |
-| `nasb` | New American Standard Bible (2020) | © The Lockman Foundation, used by permission † |
-| `amp` | Amplified Bible | © The Lockman Foundation, used by permission † |
-| `net` | NET Bible | © Biblical Studies Press, non-commercial use only † |
-
-† For these, the page automatically shows the publisher's copyright notice under the verse, as their licences require.
-
-`translation=niv` shows OurManna's own NIV text. It only works without `ref`, because the Free Use Bible API doesn't have the NIV. With `ref`, it falls back to KJV.
-
-#### Other translations
-
-You can pass any translation ID from the API. **[LANGUAGES.md](LANGUAGES.md) lists all of them by language**, with each one's licence. These IDs are case-sensitive. Some other public-domain English translations:
-
-| ID | Translation |
-|---|---|
-| `eng_webu` | World English Bible Updated |
-| `eng_msb` | Majority Standard Bible |
-| `eng_gnv` | Geneva Bible 1599 |
-| `eng_rv5` | Revised Version (1895) |
-| `eng_wbs` | Noah Webster Bible |
-| `eng_cpb` | KJV Cambridge Paragraph Bible |
-| `eng_tnt` | Tyndale New Testament (New Testament only) |
-| `eng_jps` | JPS Tanakh 1917 (Old Testament only) |
-
-Check each translation's licence in the full list before using it. Some, such as the Free Bible Version (`eng_fbv`), require credit to the translator. The page shows only the translation's name for them, which may not be enough. If a translation doesn't include the book of the day's verse, the page falls back to NIV.
-
-## Embedding in SharePoint Online
-
-1. **Allow the domain (one-off, needs a site collection admin).** Go to **Site settings → Site Collection Administration → HTML Field Security** and add `ikelaiah.github.io` to the list of allowed iframe domains.
-2. **Add the web part.** Edit the page, add an **Embed** web part, and paste the iframe code from [Usage](#usage). Add any [URL parameters](#url-parameters) you want to the `src`.
-3. **Adjust the height.** Verses vary in length, and `nasb`, `amp` and `net` add a copyright line. If anything gets cut off, raise `height` (e.g. to `260`) or remove `scrolling="no"`.
-
-## How it works
-
-```
-                 no ref                                       ref=…
-                   │                                            │
-   OurManna JSON API (verse + reference)                        │
-                   │                                            │
-     translation=niv? ── yes ──► show OurManna's NIV text       │
-                   │                                            │
-                   no                                           │
-                   ▼                                            ▼
-     Free Use Bible API: fetch the chapter(s) in the chosen translation (default KJV),
-     then pick out the verses in the reference
-                   │
-       success ──► show that translation (+ copyright notice if required)
-       failure ──► fall back to OurManna's NIV text (or an error message for ref=…)
+```sh
+npx playwright install chromium
+npm run test:browser
 ```
 
-- Everything runs in the visitor's browser. There's no server, build step or API key.
-- The Free Use Bible API serves static JSON files from a CDN. It has **no rate limits**, so it's fine on networks where many people share one IP address.
-- Book names are converted to standard book codes (`Romans` → `ROM`, `1 John` → `1JN`) inside the page.
-- Both APIs allow requests from any website (`Access-Control-Allow-Origin: *`).
-- All verse text is inserted with `textContent`, never as HTML.
+`npm run catalogue:check` compares `LANGUAGES.md` with the checked-in `data/translations.json`; it is offline. `npm run catalogue:generate` writes the Markdown from that snapshot. `npm run catalogue:refresh` explicitly fetches the current upstream list, preserves curated labels where IDs match, updates the snapshot and Markdown, and records the fetch date. Review the generated diff before committing it. The normal widget loads neither the full catalogue nor the builder.
 
-## Customising
-
-All styling is in the `<style>` block at the top of [`index.html`](index.html). It uses SharePoint's Segoe UI font, dark grey text and a **transparent background**, so it takes on the colour of the page section it sits in. If you place it on a dark section, change `color` on `body`.
-
-The element IDs (`#mannaverse`, `#mannaverse-reference`, `#mannaverse-version`) match OurManna's widget, so their [CSS styling guide](https://ourmanna.readme.io/reference/styling-using-css) still applies.
-
-To add your own short translation ID, add an entry to the `TRANSLATIONS` object near the top of the script.
-
-## Known limitations
-
-- **NIV only comes from OurManna.** ESV, NLT, CSB and NIV aren't in the Free Use Bible API. ESV, NLT and CSB aren't available at all, and NIV works only for OurManna's own pick (`translation=niv`), not with `ref`.
-- **Verse ranges can end mid-sentence.** OurManna chooses its ranges to read well in the NIV. KJV (the default) and other translations divide sentences differently, so the same range may start or end mid-sentence.
-- **Some references fall back to NIV.** References the page can't read fall back to OurManna's NIV text: comma lists such as `Psalm 46:1,10`, abbreviations such as `Jn 3:16`, and spans of more than 3 chapters. With `ref=`, they show an error message instead.
-- **OurManna's choices are fixed.** Its API only accepts `format` and `order`, and it labels every verse "NIV", although some of its random verses have King James wording.
-- **NASB 1995 isn't built in.** The API has it as `NASB95`, but supplies the NASB 2020 copyright notice for it.
+The site is static and has no build step. `assets/core.js` contains shared parsing and API validation; `assets/widget.js` renders the widget; `assets/setup.js` powers the builder. See [development notes](docs/development.md) for release checks and maintenance details.
 
 ## Credits
 
-- Verse selection and NIV text: [OurManna.com](https://www.ourmanna.com/)
-- Other translations: [Free Use Bible API](https://bible.helloao.org/) by [AO Lab](https://github.com/HelloAOLab/bible-api)
-- Translation copyrights belong to their respective publishers. See [Translations](#translations).
+- Daily/random verse selection and OurManna text: [OurManna](https://www.ourmanna.com/).
+- Translation chapter data and catalogue: [Free Use Bible API](https://bible.helloao.org/) by [AO Lab](https://github.com/HelloAOLab/bible-api).
+- Translation publishers and contributors retain their respective rights. Where the API includes an attribution notice with chapter data, the widget displays it with the passage. Review each translation's publisher information for all requirements.

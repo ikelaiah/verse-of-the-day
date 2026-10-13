@@ -56,7 +56,7 @@ Spaces in `ref` are fine in most places. If a tool complains, write them as `%20
 
 ### Translations
 
-Translations other than OurManna's NIV come from the [Free Use Bible API](https://bible.helloao.org/). These short IDs are built in:
+Translations other than OurManna's NIV come from the [Free Use Bible API](https://bible.helloao.org/), which has over 1,200 translations (54 in English). The 12 below have short IDs built into this page. Any other can be used by its full ID; see [Other translations](#other-translations).
 
 | ID | Translation | Licence |
 |---|---|---|
@@ -77,7 +77,22 @@ Translations other than OurManna's NIV come from the [Free Use Bible API](https:
 
 `translation=niv` shows OurManna's own NIV text. It only works without `ref`, because the Free Use Bible API doesn't have the NIV. With `ref`, it falls back to KJV.
 
-**Other translations.** You can also pass any translation ID from the API's [full list](https://bible.helloao.org/api/available_translations.json) (over 1,000 translations, many languages), for example `translation=eng_fbv` for the Free Bible Version. These IDs are case-sensitive. Check each translation's licence before using it.
+#### Other translations
+
+You can pass any translation ID from the API's [full list](https://bible.helloao.org/api/available_translations.json). These IDs are case-sensitive. Some other public-domain English translations:
+
+| ID | Translation |
+|---|---|
+| `eng_webu` | World English Bible Updated |
+| `eng_msb` | Majority Standard Bible |
+| `eng_gnv` | Geneva Bible 1599 |
+| `eng_rv5` | Revised Version (1895) |
+| `eng_wbs` | Noah Webster Bible |
+| `eng_cpb` | KJV Cambridge Paragraph Bible |
+| `eng_tnt` | Tyndale New Testament (New Testament only) |
+| `eng_jps` | JPS Tanakh 1917 (Old Testament only) |
+
+Check each translation's licence in the full list before using it. Some, such as the Free Bible Version (`eng_fbv`), require credit to the translator. The page shows only the translation's name for them, which may not be enough. If a translation doesn't include the book of the day's verse, the page falls back to NIV.
 
 ## Embedding in SharePoint Online
 

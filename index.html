@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Verse of the Day</title>
+  <style>
+    html, body { margin: 0; padding: 0; background: transparent; }
+    body {
+      font-family: "Segoe UI", -apple-system, BlinkMacSystemFont, Roboto, "Helvetica Neue", sans-serif;
+      color: #323130;
+      padding: 12px 16px;
+    }
+    #mannaverse { font-size: 18px; line-height: 1.5; margin: 0 0 8px; }
+    #mannaverse-reference { font-size: 14px; font-weight: 600; margin: 0; color: #605e5c; }
+    #mannaverse-version { font-weight: 400; margin-left: 4px; }
+    .attribution { font-size: 11px; margin: 8px 0 0; color: #8a8886; }
+    .attribution a { color: inherit; }
+  </style>
+</head>
+<body>
+  <div id="ourmanna-verse">Loading...</div>
+  <script src="https://beta.ourmanna.com/verses/api/js/"
+          onerror="document.getElementById('ourmanna-verse').textContent='Verse of the day is unavailable right now.'"></script>
+  <p class="attribution">Powered by <a href="https://www.ourmanna.com/" target="_blank" rel="noopener">OurManna.com</a></p>
+</body>
+</html>

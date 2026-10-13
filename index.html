@@ -23,11 +23,11 @@
   <!--
     URL parameters (all optional):
       order=random       new OurManna verse on every load (default: daily)
-      translation=bsb    show the verse in another translation via the Free Use Bible API
+      translation=bsb    translation to show, via the Free Use Bible API (default: kjv)
                          (bsb, kjv, web, webbe, nasb, amp, net, asv, bbe, darby, dra, ylt,
                          or any translation ID from https://bible.helloao.org/api/available_translations.json;
-                         default: OurManna's NIV)
-      ref=John 3:16      show a fixed passage instead of OurManna's pick (default translation: bsb)
+                         niv shows OurManna's own NIV text)
+      ref=John 3:16      show a fixed passage instead of OurManna's pick (niv isn't available here)
   -->
   <div id="ourmanna-verse">
     <div id="mannaverse-container">
@@ -65,9 +65,8 @@
       var params = new URLSearchParams(location.search);
       var order = params.get('order') === 'random' ? 'random' : 'daily';
       var ref = (params.get('ref') || '').trim();
-      var requested = (params.get('translation') || '').trim();
-      if (requested.toLowerCase() === 'niv') requested = '';
-      if (!requested && ref) requested = 'bsb';
+      var requested = (params.get('translation') || 'kjv').trim();
+      if (requested.toLowerCase() === 'niv') requested = ref ? 'kjv' : '';
       var alias = requested.toLowerCase();
       var translationId = TRANSLATIONS[alias] || requested;
       var label = TRANSLATIONS[alias] ? alias.toUpperCase() : '';
@@ -154,7 +153,7 @@
       function verseText(item) {
         return item.content.map(function (part) {
           return typeof part === 'string' ? part : (part.text || ' ');
-        }).join(' ');
+        }).join(' ').replace(/¶/g, ' ');  // KJV paragraph marks
       }
 
       function fromFreeBible(reference, fromManna) {

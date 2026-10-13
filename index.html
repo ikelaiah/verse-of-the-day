@@ -16,15 +16,18 @@
     #mannaverse-version { font-weight: 400; margin-left: 4px; }
     .attribution { font-size: 11px; margin: 8px 0 0; color: #8a8886; }
     .attribution a { color: inherit; }
+    .attribution .notice { display: block; margin-top: 2px; }
   </style>
 </head>
 <body>
   <!--
     URL parameters (all optional):
       order=random       new OurManna verse on every load (default: daily)
-      translation=kjv    show OurManna's verse in another translation via bible-api.com
-                         (kjv, web, webbe, asv, bbe, darby, dra, oeb-cw, oeb-us, ylt; default: OurManna's NIV)
-      ref=John 3:16      show a fixed passage instead of OurManna's pick (default translation: web)
+      translation=bsb    show the verse in another translation via the Free Use Bible API
+                         (bsb, kjv, web, webbe, nasb, amp, net, asv, bbe, darby, dra, ylt,
+                         or any translation ID from https://bible.helloao.org/api/available_translations.json;
+                         default: OurManna's NIV)
+      ref=John 3:16      show a fixed passage instead of OurManna's pick (default translation: bsb)
   -->
   <div id="ourmanna-verse">
     <div id="mannaverse-container">
@@ -36,11 +39,38 @@
 
   <script>
     (function () {
+      // Friendly names for common Free Use Bible API translation IDs
+      var TRANSLATIONS = {
+        bsb: 'BSB', kjv: 'eng_kjv', web: 'ENGWEBP', webbe: 'eng_webpb',
+        nasb: 'NASB2020', amp: 'AMP', net: 'eng_net',
+        asv: 'eng_asv', bbe: 'eng_bbe', darby: 'eng_dby', dra: 'eng_dra', ylt: 'eng_ylt'
+      };
+
+      // Book name (lowercase, letters and digits only) -> USFM book ID used by the API
+      var BOOKS = {};
+      ('GEN genesis|EXO exodus|LEV leviticus|NUM numbers|DEU deuteronomy|JOS joshua|JDG judges|RUT ruth|' +
+       '1SA 1samuel|2SA 2samuel|1KI 1kings|2KI 2kings|1CH 1chronicles|2CH 2chronicles|EZR ezra|NEH nehemiah|' +
+       'EST esther|JOB job|PSA psalms psalm|PRO proverbs|ECC ecclesiastes|SNG songofsongs songofsolomon|' +
+       'ISA isaiah|JER jeremiah|LAM lamentations|EZK ezekiel|DAN daniel|HOS hosea|JOL joel|AMO amos|' +
+       'OBA obadiah|JON jonah|MIC micah|NAM nahum|HAB habakkuk|ZEP zephaniah|HAG haggai|ZEC zechariah|' +
+       'MAL malachi|MAT matthew|MRK mark|LUK luke|JHN john|ACT acts|ROM romans|1CO 1corinthians|' +
+       '2CO 2corinthians|GAL galatians|EPH ephesians|PHP philippians|COL colossians|1TH 1thessalonians|' +
+       '2TH 2thessalonians|1TI 1timothy|2TI 2timothy|TIT titus|PHM philemon|HEB hebrews|JAS james|' +
+       '1PE 1peter|2PE 2peter|1JN 1john|2JN 2john|3JN 3john|JUD jude|REV revelation revelations')
+        .split('|').forEach(function (entry) {
+          var names = entry.split(' ');
+          names.forEach(function (name) { BOOKS[name.toLowerCase()] = names[0]; });
+        });
+
       var params = new URLSearchParams(location.search);
       var order = params.get('order') === 'random' ? 'random' : 'daily';
-      var translation = (params.get('translation') || '').trim().toLowerCase();
       var ref = (params.get('ref') || '').trim();
-      if (translation === 'niv') translation = '';
+      var requested = (params.get('translation') || '').trim();
+      if (requested.toLowerCase() === 'niv') requested = '';
+      if (!requested && ref) requested = 'bsb';
+      var alias = requested.toLowerCase();
+      var translationId = TRANSLATIONS[alias] || requested;
+      var label = TRANSLATIONS[alias] ? alias.toUpperCase() : '';
 
       var verseEl = document.getElementById('mannaverse');
       var refEl = document.getElementById('mannaverse-reference');
@@ -66,14 +96,20 @@
         refEl.appendChild(small);
       }
 
-      function credit(fromManna, translationName) {
+      function credit(fromManna, translationName, notice) {
         attrEl.textContent = '';
         if (fromManna) {
           attrEl.append(translationName ? 'Verse chosen by ' : 'Powered by ', link('https://www.ourmanna.com/', 'OurManna.com'));
         }
         if (translationName) {
           if (fromManna) attrEl.append(' · ');
-          attrEl.append(translationName + ' via ', link('https://bible-api.com/', 'bible-api.com'));
+          attrEl.append(translationName + ' via ', link('https://bible.helloao.org/', 'Free Use Bible API'));
+        }
+        if (notice) {
+          var span = document.createElement('span');
+          span.className = 'notice';
+          span.textContent = notice.replace(/\s+/g, ' ').trim();
+          attrEl.appendChild(span);
         }
       }
 
@@ -90,17 +126,66 @@
         });
       }
 
-      function fromBibleApi(reference, fromManna) {
-        var url = 'https://bible-api.com/' + encodeURIComponent(reference) +
-                  '?translation=' + encodeURIComponent(translation || 'web');
-        return getJson(url).then(function (d) {
-          show(d.text, d.reference, d.translation_id.toUpperCase());
-          credit(fromManna, d.translation_name);
+      // "Romans 2:7-8", "1 John 4:8", "Psalm 23", "Romans 8:38-9:1"
+      function parseRef(text) {
+        var m = /^(.+?)\s*(\d+)(?::(\d+)(?:\s*[-–]\s*(?:(\d+):)?(\d+))?)?$/.exec(text.trim());
+        if (!m) return null;
+        var book = BOOKS[m[1].toLowerCase().replace(/[^a-z0-9]/g, '')];
+        if (!book) return null;
+        var chapter = +m[2];
+        return {
+          book: book,
+          startCh: chapter,
+          startV: m[3] ? +m[3] : 1,
+          endCh: m[4] ? +m[4] : chapter,
+          endV: m[5] ? +m[5] : (m[3] ? +m[3] : Infinity)
+        };
+      }
+
+      function formatRef(bookName, r) {
+        var s = bookName + ' ' + r.startCh;
+        if (r.endV === Infinity) return s;
+        s += ':' + r.startV;
+        if (r.endCh !== r.startCh) return s + '-' + r.endCh + ':' + r.endV;
+        return r.endV !== r.startV ? s + '-' + r.endV : s;
+      }
+
+      // Verse content mixes plain strings with {text}, {noteId}, {lineBreak} and {heading} objects
+      function verseText(item) {
+        return item.content.map(function (part) {
+          return typeof part === 'string' ? part : (part.text || ' ');
+        }).join(' ');
+      }
+
+      function fromFreeBible(reference, fromManna) {
+        var r = parseRef(reference);
+        if (!r || r.endCh < r.startCh || r.endCh - r.startCh > 2) {
+          return Promise.reject(new Error('Unsupported reference: ' + reference));
+        }
+        var urls = [];
+        for (var c = r.startCh; c <= r.endCh; c++) {
+          urls.push('https://bible.helloao.org/api/' + encodeURIComponent(translationId) + '/' + r.book + '/' + c + '.json');
+        }
+        return Promise.all(urls.map(getJson)).then(function (chapters) {
+          var parts = [];
+          chapters.forEach(function (d) {
+            var ch = d.chapter.number;
+            d.chapter.content.forEach(function (item) {
+              if (item.type !== 'verse') return;
+              if (ch === r.startCh && item.number < r.startV) return;
+              if (ch === r.endCh && item.number > r.endV) return;
+              parts.push(verseText(item));
+            });
+          });
+          if (!parts.length) throw new Error('Passage not found: ' + reference);
+          var t = chapters[0].translation;
+          show(parts.join(' '), formatRef(chapters[0].book.commonName, r), label || t.shortName);
+          credit(fromManna, t.name, t.licenseNotice);
         });
       }
 
       if (ref) {
-        fromBibleApi(ref, false).catch(fail);
+        fromFreeBible(ref, false).catch(fail);
         return;
       }
 
@@ -111,9 +196,9 @@
             show(v.text, v.reference, v.version);
             credit(true);
           }
-          if (!translation) return showManna();
-          // Unknown translation, passage missing from it, or rate-limited: keep OurManna's own text
-          return fromBibleApi(v.reference, true).catch(showManna);
+          if (!translationId) return showManna();
+          // Unknown translation, unparseable reference or passage missing from it: keep OurManna's own text
+          return fromFreeBible(v.reference, true).catch(showManna);
         })
         .catch(fail);
     })();
